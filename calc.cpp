@@ -1,99 +1,181 @@
 #include "calc.h"
+#include "codes_operations.h"
+#include "sys\stat.h"
 
-int calculate (Stack* stack, Onegin *line, const int amount_operations)
+int cmp_files (void)
 {
-    char add  [] = "add";
-    char sub  [] = "sub";
-    char mul  [] = "mul";
-    char push [] = "push";
-    char pop  [] = "pop";
-    char div  [] = "div";
-    char out  [] = "out";
-    char hlt  [] = "hlt";
+    struct stat status_asm; 
+    stat ("asm.txt", &status_asm);
 
-    /*for (int ind = 0; ind < amount_operations - 1; ind++)
+    struct stat status_code; 
+    stat ("code.rb", &status_code);
+
+    if ((status_code.st_size == 0) ||
+        (status_asm.st_mtime > status_code.st_mtime))
     {
-        puts (line[ind].adress);
-    }*/
-
-    for (int i = 0; i < amount_operations; i++)
+        return 1;
+    }
+    else 
     {
-        if (strncmp (push, line[i].adress, 4) == 0)
-        {
-            int value = 0;
-            sscanf (line[i].adress + 4, "%d", &value);
-            stack_push (stack, value);
+        return 0;
+    }
+}
 
-            continue;
+int proc (void)
+{
+    Stack st = {};
+    stack_ctor (&st, BASIC_SIZE);
+
+    calculate (&st);
+
+    stack_dump (&st, __FILE__, __func__, __LINE__);
+
+    stack_dtor (&st);
+
+    return 0;
+}
+
+elem_t calculate (Stack* stack)
+{
+    FILE* input_file = fopen ("code.rb", "rb");
+    if (input_file == NULL)
+    {
+        printf ("ERROR in function : %s \ncode.rb didn't open\n", __func__);
+        return -1;
+    }
+
+    FILE* calc_dump = fopen ("calcstatus.txt", "w");
+    if (calc_dump == NULL)
+    {
+        printf ("ERROR in function : %s \ncalcstatus.txt didn't open\n", __func__);
+        return -1;
+    }
+
+    elem_t* array = make_array (input_file);
+
+    int amount = 0;
+    int operation = 0;
+
+    while (1)
+    {   
+        operation = array [amount];
+
+        if (operation == PUSH)
+        {
+            fprintf (calc_dump, "%d : %d\n", operation, array[amount + 1]);
+        }
+        else 
+        {
+            fprintf (calc_dump, "%d\n", operation);
         }
 
-        if (strncmp (pop, line[i].adress, 3) == 0)
+        switch (operation)
         {
-            elem_t variable = 0;
-            stack_pop (stack, &variable);
+            case ERROR:
+            {
+                return 0;
+                break;
+            }
+            case PUSH: 
+            {
+                int value = array [amount + 1];
+                amount += 2;
 
-            continue;
+                stack_push (stack, value);
+
+                break;
+            }
+            case POP:
+            {
+                elem_t variable = 0;
+                stack_pop (stack, &variable);
+
+                amount++;
+                break;
+            }
+            case MUL:
+            {
+                elem_t fr_var = 0;
+                elem_t sec_var = 0;
+                stack_pop (stack, &fr_var);
+                stack_pop (stack, &sec_var);
+
+                stack_push (stack, fr_var * sec_var);
+
+                amount++;
+                break;
+            }
+            case DIV:
+            {
+                elem_t fr_var = 0;
+                elem_t sec_var = 0;
+                stack_pop (stack, &fr_var);
+                stack_pop (stack, &sec_var);
+
+                stack_push (stack, fr_var / sec_var); 
+
+                amount++;
+                break;
+            }
+            case ADD:
+            {
+                elem_t fr_var = 0;
+                elem_t sec_var = 0;
+                stack_pop (stack, &fr_var);
+                stack_pop (stack, &sec_var);
+
+                stack_push (stack, fr_var + sec_var);
+
+                amount++;
+                break;
+            }
+            case SUB:
+            {
+                elem_t fr_var = 0;
+                elem_t sec_var = 0;
+                stack_pop (stack, &fr_var);
+                stack_pop (stack, &sec_var);
+
+                stack_push (stack, fr_var + sec_var);
+                
+                amount++;
+                break;
+            }
+            case OUT:
+            {
+                printf ("%d\n", stack_top (stack));
+                amount++;
+                break;
+            }
+            case HLT:
+            {
+                break;
+            }
+            default:
+            {
+                break;
+            }
         }
 
-        if (strncmp (mul, line[i].adress, 3) == 0)
-        {
-            elem_t fr_var;
-            elem_t sec_var;
-            stack_pop (stack, &fr_var);
-            stack_pop (stack, &sec_var);
-
-            stack_push (stack, fr_var * sec_var);
-
-            continue;
-        }
-
-        if (strncmp (div, line[i].adress, 3) == 0)
-        {
-            elem_t fr_var;
-            elem_t sec_var;
-            stack_pop (stack, &fr_var);
-            stack_pop (stack, &sec_var);
-
-            stack_push (stack, fr_var / sec_var); 
-
-            continue;
-        }
-
-        if (strncmp (add, line[i].adress, 3) == 0)
-        {
-            elem_t fr_var;
-            elem_t sec_var;
-            stack_pop (stack, &fr_var);
-            stack_pop (stack, &sec_var);
-
-            stack_push (stack, fr_var + sec_var);
-
-            continue;
-        }
-
-        if (strncmp (sub, line[i].adress, 3) == 0)
-        {
-            elem_t fr_var;
-            elem_t sec_var;
-            stack_pop (stack, &fr_var);
-            stack_pop (stack, &sec_var);
-
-            stack_push (stack, fabs (fr_var - sec_var));
-
-            continue;
-        }
-
-        if (strncmp (out, line[i].adress, 3) == 0)
-        {
-            printf ("%d", stack_top (stack));
-            continue;
-        }
-
-        if (strncmp (hlt, line[i].adress, 3) == 0)
+        if (operation == HLT)
         {
             break;
         }
     }
+
+    if (ferror(input_file))
+    {
+        printf ("ERROR in function : %s \nreading input_file falled\n", __func__);
+        return -1;
+    }
+    fclose (input_file);
+
+    if (ferror(calc_dump))
+    {
+        printf ("ERROR in function : %s \nwriting calc_dump falled\n", __func__);
+        return -1;
+    }
+    fclose (calc_dump);
 
     return 0;
 }
