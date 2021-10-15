@@ -35,7 +35,7 @@ int make_array_adress (char* buffer, const int str_amount, Onegin* line)
     }
     
     adress_new_str = strchr (adress_new_str, '\0') + one;
-    *(adress_new_str - one) = '\n';
+    //*(adress_new_str - one) = '\n';//
     
     line[amount      ].adress = adress_new_str;
     line[amount - one].length = line[amount].adress - line[amount - one].adress - one;
@@ -60,7 +60,7 @@ int size_file (FILE *filestream)
     return (size);
 }
 
-char* remove_trash_and_copy_in_buffer (int* str_amount)
+char* remove_trash_and_copy_in_buffer (int* str_amount, FILE* file)
 {
     if (str_amount == NULL)
     {
@@ -68,10 +68,9 @@ char* remove_trash_and_copy_in_buffer (int* str_amount)
         return NULL;
     }
 
-    FILE *file = NULL;
-    if ((file = fopen ("input.txt", "r")) == NULL)
+    if (file == NULL)
     {
-        printf ("ERROR in function : %s \ninput.txt didnt open\n", __func__);
+        printf ("ERROR in function : %s \nfile have NULL adress\n", __func__);
         return NULL;
     }
 
@@ -129,8 +128,6 @@ char* remove_trash_and_copy_in_buffer (int* str_amount)
         printf ("ERROR in function : %s \nreading file falled\n", __func__);
         return NULL;
     }
-
-    fclose (file);
     
     return buffer;
 }
