@@ -1,3 +1,6 @@
+#ifndef STACKHEADER
+#define STACKHEADER
+
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
@@ -80,3 +83,5 @@ int     check_stack_on_errors   (const Stack* stack, const char* file, const cha
 int     stack_dump              (const Stack* stack, const char* file, const char* funct, const int line);
 
 unsigned int MurmurHash2 (char * key, unsigned int len);
+
+#endif
