@@ -1,99 +1,113 @@
 #include "calc.h"
 
-int calculate (Stack* stack, Onegin *line, const int amount_operations)
+elem_t calculate (Stack* stack)
 {
-    char add  [] = "add";
-    char sub  [] = "sub";
-    char mul  [] = "mul";
-    char push [] = "push";
-    char pop  [] = "pop";
-    char div  [] = "div";
-    char out  [] = "out";
-    char hlt  [] = "hlt";
-
-    /*for (int ind = 0; ind < amount_operations - 1; ind++)
+    if (stack == NULL)
     {
-        puts (line[ind].adress);
-    }*/
+        printf ("ERROR in function : %s \n"
+                "stack have zero adress\n", __func__);
+        return -1;
+    }
 
-    for (int i = 0; i < amount_operations; i++)
+    FILE* input_file = fopen ("code.rb", "rb");
+    if (input_file == NULL)
     {
-        if (strncmp (push, line[i].adress, 4) == 0)
-        {
-            int value = 0;
-            sscanf (line[i].adress + 4, "%d", &value);
-            stack_push (stack, value);
+        printf ("ERROR in function : %s \n"
+                "code.rb didn't open\n", __func__);
+        return -1;
+    }
 
-            continue;
+    FILE* calc_dump = fopen ("calcstatus.txt", "w");
+    if (calc_dump == NULL)
+    {
+        printf ("ERROR in function : %s \n"
+                "calcstatus.txt didn't open\n", __func__);
+        return -1;
+    }
+
+    elem_t* array = make_array (input_file);
+    if (array == NULL)
+    {
+        printf ("ERROR in function : %s \n"
+                "array have zero adress\n", __func__);
+        return -1;
+    }
+
+    int amount = 0;
+    int operation = 0;
+
+    while (1)
+    {   
+        operation = array [amount];
+
+        if (operation == PUSH)
+        {
+            fprintf (calc_dump, "%d : %d\n", operation, array[amount + 1]);
+        }
+        else 
+        {
+            fprintf (calc_dump, "%d\n", operation);
         }
 
-        if (strncmp (pop, line[i].adress, 3) == 0)
+        #define DEF_CMD(num, name, hz , arg)    \
+                case name:                      \
+                {                               \
+                    arg                         \
+                    break;                      \
+                }                               
+
+        switch (operation)
         {
-            elem_t variable = 0;
-            stack_pop (stack, &variable);
-
-            continue;
+            #include "commands.def"
         }
+        
+        #undef DEF_CMD
 
-        if (strncmp (mul, line[i].adress, 3) == 0)
-        {
-            elem_t fr_var;
-            elem_t sec_var;
-            stack_pop (stack, &fr_var);
-            stack_pop (stack, &sec_var);
-
-            stack_push (stack, fr_var * sec_var);
-
-            continue;
-        }
-
-        if (strncmp (div, line[i].adress, 3) == 0)
-        {
-            elem_t fr_var;
-            elem_t sec_var;
-            stack_pop (stack, &fr_var);
-            stack_pop (stack, &sec_var);
-
-            stack_push (stack, fr_var / sec_var); 
-
-            continue;
-        }
-
-        if (strncmp (add, line[i].adress, 3) == 0)
-        {
-            elem_t fr_var;
-            elem_t sec_var;
-            stack_pop (stack, &fr_var);
-            stack_pop (stack, &sec_var);
-
-            stack_push (stack, fr_var + sec_var);
-
-            continue;
-        }
-
-        if (strncmp (sub, line[i].adress, 3) == 0)
-        {
-            elem_t fr_var;
-            elem_t sec_var;
-            stack_pop (stack, &fr_var);
-            stack_pop (stack, &sec_var);
-
-            stack_push (stack, fabs (fr_var - sec_var));
-
-            continue;
-        }
-
-        if (strncmp (out, line[i].adress, 3) == 0)
-        {
-            printf ("%d", stack_top (stack));
-            continue;
-        }
-
-        if (strncmp (hlt, line[i].adress, 3) == 0)
+        if (operation == HLT)
         {
             break;
         }
     }
+    
+    if (ferror(input_file))
+    {
+        printf ("ERROR in function : %s \n"
+                "reading input_file falled\n", __func__);
+        return -1;
+    }
+    fclose (input_file);
+
+    if (ferror(calc_dump))
+    {
+        printf ("ERROR in function : %s \n"
+                "writing calc_dump falled\n", __func__);
+        return -1;
+    }
+    fclose (calc_dump);
 
     return 0;
+}
+
+elem_t* make_array (FILE* input_file)
+{
+    if (input_file == NULL)
+    {
+        printf ("ERROR in function : %s \n"
+                "input_file have NULL adress\n", __func__);
+        return NULL;
+    }
+
+    int size = size_file (input_file);////////////////////////////////SIZE_TTTTTTTTTT
+
+    elem_t* array = (elem_t*) calloc (size, sizeof(int));
+    if (array == NULL)
+    {
+        printf ("ERROR in function : %s \n"
+                "haven't memory for array\n", __func__);
+        return NULL;
+    }
+
+    fread (array, sizeof (char), size, input_file); /////////////obrabotka
+
+    return array;
 }
