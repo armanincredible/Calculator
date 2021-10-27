@@ -1,0 +1,44 @@
+ram_status = 0, reg_status = 0, inm_status 1, cmd = 1
+IP 5, REG_VALUE 0, INM_VALUE 10
+
+
+ram_status = 0, reg_status = 0, inm_status 1, cmd = 1
+IP 10, REG_VALUE 0, INM_VALUE 20
+
+
+ram_status = 0, reg_status = 0, inm_status 0, cmd = 3
+IP 11, REG_VALUE 0, INM_VALUE 0
+
+
+ram_status = 0, reg_status = 0, inm_status 1, cmd = 1
+IP 16, REG_VALUE 0, INM_VALUE 10
+
+
+ram_status = 0, reg_status = 0, inm_status 0, cmd = 5
+IP 17, REG_VALUE 0, INM_VALUE 0
+
+
+ram_status = 0, reg_status = 0, inm_status 1, cmd = 1
+IP 22, REG_VALUE 0, INM_VALUE 1
+
+
+ram_status = 0, reg_status = 0, inm_status 1, cmd = 1
+IP 27, REG_VALUE 0, INM_VALUE 12
+
+
+ram_status = 0, reg_status = 0, inm_status 0, cmd = 4
+IP 28, REG_VALUE 0, INM_VALUE 0
+
+
+ram_status = 0, reg_status = 0, inm_status 0, cmd = 3
+IP 29, REG_VALUE 0, INM_VALUE 0
+
+
+ram_status = 0, reg_status = 0, inm_status 0, cmd = 7
+IP 30, REG_VALUE 0, INM_VALUE 0
+
+
+ram_status = 0, reg_status = 0, inm_status 0, cmd = 0
+IP 31, REG_VALUE 0, INM_VALUE 0
+
+

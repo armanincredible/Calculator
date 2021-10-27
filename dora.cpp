@@ -2,31 +2,27 @@
 
 int make_array_adress (char* buffer, const int str_amount, Onegin* line)
 {
+    if (line == NULL)
+    {
+        printf ("ERROR in function : %s \nline has zero adress\n", __func__);
+        return -1;  
+    }
     if (buffer == NULL)
     {
         printf ("ERROR in function : %s \nbuffer has zero adress\n", __func__);
         return -1;
-    }
-    
-    for (int ind = 0; ind < str_amount; ind++)
-    {
-        line[ind].adress = (char*) calloc (1, sizeof (char*));
-        if (line[ind].adress == NULL)
-        {
-            printf ("ERROR in function : %s \nhaven't memory for struct line\n", __func__);
-            return -1;
-        }
     }
 
     char *adress_new_str = buffer;
     char *past_adress = buffer;
     line[0].adress = buffer;
     int amount = 1;
-    int one = 1; // ammount for work with symbols and strings
+    int one = 1; 
 
     for (; amount != str_amount; amount++)
     {
         adress_new_str = strchr (adress_new_str, '\n') + one;
+        *(adress_new_str - 1) = '\0';
 
         line [amount      ].adress = adress_new_str;
         line [amount - one].length = adress_new_str - past_adress - one;
@@ -35,7 +31,7 @@ int make_array_adress (char* buffer, const int str_amount, Onegin* line)
     }
     
     adress_new_str = strchr (adress_new_str, '\0') + one;
-    *(adress_new_str - one) = '\n';
+    //*(adress_new_str - one) = '\n';//
     
     line[amount      ].adress = adress_new_str;
     line[amount - one].length = line[amount].adress - line[amount - one].adress - one;
@@ -60,7 +56,7 @@ int size_file (FILE *filestream)
     return (size);
 }
 
-char* remove_trash_and_copy_in_buffer (int* str_amount)
+char* remove_trash_and_copy_in_buffer (int* str_amount, FILE* file)
 {
     if (str_amount == NULL)
     {
@@ -68,10 +64,9 @@ char* remove_trash_and_copy_in_buffer (int* str_amount)
         return NULL;
     }
 
-    FILE *file = NULL;
-    if ((file = fopen ("input.txt", "r")) == NULL)
+    if (file == NULL)
     {
-        printf ("ERROR in function : %s \ninput.txt didnt open\n", __func__);
+        printf ("ERROR in function : %s \nfile have NULL adress\n", __func__);
         return NULL;
     }
 

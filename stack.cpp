@@ -41,7 +41,7 @@ int stack_ctor (Stack* stack, const int size_st)
     #ifdef SECOND_LEVEL
         stack->hash = 0;
     #endif
-
+    
     return check_stack_on_errors_(stack);
 
 }
@@ -108,6 +108,10 @@ int stack_push (Stack* stack, elem_t value)
 int stack_pop (Stack* stack, elem_t *variable)
 {
     int error = 0;
+    if (stack->size <= 0)
+    {
+        stack->status = "MEMORY_SIZE_ERROR";
+    }
     if ((error = check_stack_on_errors_(stack)) > 0)
     {
         return error;
@@ -198,6 +202,11 @@ int stack_status (Stack* stack)
     {
         stack->status = "STACK_ADRESS_ERROR";
         return STACK_ADRESS_ERROR;
+    }
+
+    if (stack->status == "MEMORY_SIZE_ERROR")
+    {
+        return MEMORY_SIZE_ERROR;
     }
 
     if ((stack->capacity <= 0) ||
@@ -357,6 +366,7 @@ int stack_dump (const Stack* stack, const char* file, const char* funct, const i
 
     fprintf (stack_status_file,  "Stack <%s> Have %s at %s at (%s:%d) \n\n",
              typeid(stack).name(), stack->status, file, funct, line);
+
 
     if (stack->data != (elem_t*)POISON_ADRESS)
     {       
